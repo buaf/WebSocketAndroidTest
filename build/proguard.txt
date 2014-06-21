@@ -1,0 +1,9 @@
+# view AndroidManifest.xml #generated:26
+-keep class com.example.ConnectionService { <init>(...); }
+
+# view AndroidManifest.xml #generated:17
+-keep class com.example.MainActivity { <init>(...); }
+
+# view AndroidManifest.xml #generated:30
+-keep class com.example.MessagesProvider { <init>(...); }
+

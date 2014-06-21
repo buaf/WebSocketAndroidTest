@@ -1,0 +1,26 @@
+/home/slony/Data/WorkProjects/WebSocket/build/classes.dex : \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MainActivity.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/R$id.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/UnsentMessagestTableConstants.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/R$string.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/R$drawable.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/ConnectionService$TextMessage.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/ConnectionService.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MainActivity$3.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/DatabaseHelper.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/R$attr.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/Utils.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/R$layout.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MainActivity$1.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/BuildConfig.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MessagesListAdapter.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/ConnectionService$3.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/R.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MessagesProvider.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MessagesTableConstants.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/MainActivity$2.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/ConnectionService$2.class \
+/home/slony/Data/WorkProjects/WebSocket/build/classes/com/example/ConnectionService$1.class \
+/home/slony/Data/WorkProjects/WebSocket/build/dexedLibs/jackson-core-asl-1.9.7-6e2f47c891f3dae96bc12251606dce3b.jar \
+/home/slony/Data/WorkProjects/WebSocket/build/dexedLibs/jackson-mapper-asl-1.9.7-d6043b19f5ac2895028a57c5e8e28dad.jar \
+/home/slony/Data/WorkProjects/WebSocket/build/dexedLibs/autobahn-0.5.0-a4362ee5bdc09997c7c93ef34937c769.jar \
