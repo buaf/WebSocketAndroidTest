@@ -151,6 +151,7 @@ public class ConnectionService extends Service {
                         Utils.debug("You need to enable internet!");
                     }
                     mWaitConnectionSemaphore.release();
+                    mSendMessageSemaphore.release();
                 }
             });
 
@@ -233,7 +234,7 @@ public class ConnectionService extends Service {
                             Iterator<TextMessage> iterator = mMessageQueue.iterator();
                             while (iterator.hasNext()) {
                                 mLastMessage = iterator.next();
-                                mConnection.sendTextMessage(mLastMessage.data);
+                                mConnection.sendTextMessage(mLastMessage.data + " ");
                                 mSendMessageSemaphore.acquire();
                             }
 
