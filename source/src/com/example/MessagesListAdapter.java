@@ -87,6 +87,7 @@ public class MessagesListAdapter extends CursorAdapter
                 mUnsentMessageCache.add(id);
             }
         }
+        unsetMsgCursor.close();
 
         super.notifyDataSetChanged();
     }
