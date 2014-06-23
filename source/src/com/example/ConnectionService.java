@@ -230,9 +230,8 @@ public class ConnectionService extends Service {
                         if (mIsConnected) {
                             Utils.debug("Messages to send:" + mMessageQueue.size());
 
-                            Iterator<TextMessage> iterator = mMessageQueue.iterator();
-                            while (iterator.hasNext()) {
-                                mLastMessage = iterator.next();
+                            for (TextMessage aMMessageQueue : mMessageQueue) {
+                                mLastMessage = aMMessageQueue;
                                 mConnection.sendTextMessage(mLastMessage.data + " ");
                                 mSendMessageSemaphore.acquire();
                             }
@@ -246,9 +245,7 @@ public class ConnectionService extends Service {
 
                         if (getUnsentMessagesCount() > 0) {
                             loadUnsentMessages();
-                        } else if (mMessageQueue.size() > 0){
-                            continue;
-                        } else {
+                        } else if (mMessageQueue.size() < 1){
                             Thread.sleep(120000);
                         }
                     } catch (InterruptedException e) {
