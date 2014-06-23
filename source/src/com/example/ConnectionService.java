@@ -97,7 +97,6 @@ public class ConnectionService extends Service {
             }
             msgCursor.close();
         }
-
         unsetMsgCursor.close();
     }
 

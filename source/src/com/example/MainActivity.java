@@ -8,7 +8,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,9 +22,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 public class MainActivity extends Activity {
+
+    public final ExecutorService mMessageExecutorService = Executors.newFixedThreadPool(1);
 
     private final Messenger mMessenger = new Messenger(getMessengerHandler());
     private final ServiceConnection mConnection = getServiceConnection();
@@ -88,33 +91,35 @@ public class MainActivity extends Activity {
         mSendMsgButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String textMessage = mSendMsgEdit.getText().toString();
+                    mMessageExecutorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            String textMessage = mSendMsgEdit.getText().toString();
 
-                long unixTime = System.currentTimeMillis() / 1000L;
-                ContentValues messageValues = new ContentValues();
-                messageValues.put(MessagesTableConstants._DATE, unixTime);
-                messageValues.put(MessagesTableConstants._TEXT, textMessage);
-                Uri createdRow = getContentResolver().insert(MessagesTableConstants.CONTENT_URI, messageValues);
+                            long unixTime = System.currentTimeMillis() / 1000L;
+                            ContentValues messageValues = new ContentValues();
+                            messageValues.put(MessagesTableConstants._DATE, unixTime);
+                            messageValues.put(MessagesTableConstants._TEXT, textMessage);
+                            Uri createdRow = getContentResolver().insert(MessagesTableConstants.CONTENT_URI, messageValues);
 
-                long rowId = ContentUris.parseId(createdRow);
-                ContentValues unsentMessageValues = new ContentValues();
-                unsentMessageValues.put(UnsentMessagestTableConstants._ID, rowId);
-                getContentResolver().insert(UnsentMessagestTableConstants.CONTENT_URI, unsentMessageValues);
+                            long rowId = ContentUris.parseId(createdRow);
+                            ContentValues unsentMessageValues = new ContentValues();
+                            unsentMessageValues.put(UnsentMessagestTableConstants._ID, rowId);
+                            getContentResolver().insert(UnsentMessagestTableConstants.CONTENT_URI, unsentMessageValues);
 
-                Message msg = Message.obtain(null, ConnectionService.MSG_SEND_SOCKET, 0, 0);
-                Bundle bundle = msg.getData();
-                bundle.putString(ConnectionService.BUNDLE_MESSAGE_TEXT, textMessage);
-                bundle.putLong(ConnectionService.BUNDLE_MESSAGE_ID, rowId);
+                            Message msg = Message.obtain(null, ConnectionService.MSG_SEND_SOCKET, 0, 0);
+                            Bundle bundle = msg.getData();
+                            bundle.putString(ConnectionService.BUNDLE_MESSAGE_TEXT, textMessage);
+                            bundle.putLong(ConnectionService.BUNDLE_MESSAGE_ID, rowId);
+                            try {
+                                mService.send(msg);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
 
-                mMsgListAdapter.notifyDataSetChanged();
-
-                try {
-                    mService.send(msg);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-
-                Utils.debug("Write:" + textMessage);
+                            Utils.debug("Write:" + textMessage);
+                        }
+                    });
             }
         });
     }

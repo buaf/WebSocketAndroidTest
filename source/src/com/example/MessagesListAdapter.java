@@ -88,7 +88,6 @@ public class MessagesListAdapter extends CursorAdapter
             }
         }
         unsetMsgCursor.close();
-
         super.notifyDataSetChanged();
     }
 
