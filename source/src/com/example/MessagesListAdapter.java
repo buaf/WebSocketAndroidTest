@@ -76,9 +76,7 @@ public class MessagesListAdapter extends CursorAdapter
 
     @Override
     public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
         mUnsentMessageCache.clear();
-        
         Uri uri = UnsentMessagestTableConstants.CONTENT_URI;
         String[] projection = new String[]{UnsentMessagestTableConstants._ID};
         Cursor unsetMsgCursor = mMainActivity.getContentResolver().query(uri, projection, null, null, null);
@@ -89,6 +87,8 @@ public class MessagesListAdapter extends CursorAdapter
                 mUnsentMessageCache.add(id);
             }
         }
+
+        super.notifyDataSetChanged();
     }
 
     public String stringToTextData(String text) {

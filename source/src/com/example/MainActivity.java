@@ -105,6 +105,9 @@ public class MainActivity extends Activity {
                 Bundle bundle = msg.getData();
                 bundle.putString(ConnectionService.BUNDLE_MESSAGE_TEXT, textMessage);
                 bundle.putLong(ConnectionService.BUNDLE_MESSAGE_ID, rowId);
+
+                mMsgListAdapter.notifyDataSetChanged();
+
                 try {
                     mService.send(msg);
                 } catch (RemoteException e) {
