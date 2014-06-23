@@ -32,6 +32,8 @@ public class ConnectionService extends Service {
     public static final String BUNDLE_MESSAGE_ID = "id";
 
     private final WebSocketConnection mConnection = new WebSocketConnection();
+    private boolean mIsConnected = false;
+
     private final Messenger mMessenger = new Messenger(getMessengerHandler());
     private final ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
@@ -39,7 +41,6 @@ public class ConnectionService extends Service {
     private final Semaphore mWaitConnectionSemaphore = new Semaphore(0);
     private final Semaphore mSendMessageSemaphore = new Semaphore(0);
 
-    private boolean mIsConnected = false;
     private final LinkedBlockingDeque<TextMessage> mMessageQueue = new LinkedBlockingDeque<TextMessage>();
     private TextMessage mLastMessage;
 
@@ -134,9 +135,12 @@ public class ConnectionService extends Service {
 
                 @Override
                 public void onTextMessage(String msg) {
-                    String textMsg = " Server message:" + msg + " ";
-                    Utils.debug(textMsg);
-                    sendMessageToClients(mLastMessage.id, textMsg);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(" Server message:").append(msg).append(' ');
+                    builder.append(" Last send message:").append(mLastMessage.data);
+
+                    Utils.debug(builder.toString());
+                    sendMessageToClients(mLastMessage.id, msg);
                     mMessageQueue.remove(mLastMessage);
                     mSendMessageSemaphore.release();
                 }
@@ -207,8 +211,8 @@ public class ConnectionService extends Service {
                         textMessage.id = msgId;
                         if (!mMessageQueue.contains(textMessage)) {
                             mMessageQueue.add(textMessage);
+                            mSendMessageThread.interrupt();
                         }
-                        mSendMessageThread.interrupt();
                         break;
                     default:
                         super.handleMessage(msg);
