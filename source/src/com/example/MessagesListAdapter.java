@@ -15,7 +15,9 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.util.ArrayDeque;
 import java.util.Date;
+import java.util.Deque;
 import java.util.Locale;
 
 public class MessagesListAdapter extends CursorAdapter
@@ -23,6 +25,7 @@ public class MessagesListAdapter extends CursorAdapter
 
     private MainActivity mMainActivity;
     private LayoutInflater mInflater;
+    private final Deque<Integer> mUnsentMessageCache = new ArrayDeque<Integer>();
 
     static final String[] MESSAGES_PROJECTION = new String[]{
             MessagesTableConstants._ID,
@@ -63,18 +66,29 @@ public class MessagesListAdapter extends CursorAdapter
         TextView textView = (TextView) view.findViewById(R.id.messageText);
         textView.setText(text);
 
-        Uri uri = UnsentMessagestTableConstants.CONTENT_URI;
-        String[] projection = new String[]{UnsentMessagestTableConstants._ID};
-        String selection = UnsentMessagestTableConstants._ID + "=?";
-        String[] selectionArgs = new String[]{index};
-
-        Cursor c = mMainActivity.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-        if (c.getCount() > 0) {
+        Integer value = Integer.parseInt(index);
+        if (mUnsentMessageCache.contains(value)) {
             view.setBackgroundColor(Color.parseColor("#FFA3A1"));
         } else {
             view.setBackgroundColor(Color.parseColor("#AEFF7E"));
         }
-        c.close();
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        mUnsentMessageCache.clear();
+        
+        Uri uri = UnsentMessagestTableConstants.CONTENT_URI;
+        String[] projection = new String[]{UnsentMessagestTableConstants._ID};
+        Cursor unsetMsgCursor = mMainActivity.getContentResolver().query(uri, projection, null, null, null);
+        for (unsetMsgCursor.moveToFirst(); !unsetMsgCursor.isAfterLast(); unsetMsgCursor.moveToNext()) {
+            String unsetMsgIndex = unsetMsgCursor.getString(unsetMsgCursor.getColumnIndexOrThrow(UnsentMessagestTableConstants._ID));
+            Integer id = Integer.parseInt(unsetMsgIndex);
+            if (!mUnsentMessageCache.contains(id)) {
+                mUnsentMessageCache.add(id);
+            }
+        }
     }
 
     public String stringToTextData(String text) {
@@ -89,7 +103,7 @@ public class MessagesListAdapter extends CursorAdapter
         Utils.debug("");
         CursorLoader cursorLoader = new CursorLoader(mMainActivity, MessagesTableConstants.CONTENT_URI,
                 MESSAGES_PROJECTION, null, null, null);
-        cursorLoader.setUpdateThrottle(2000);
+        cursorLoader.setUpdateThrottle(1000);
         return cursorLoader;
     }
 

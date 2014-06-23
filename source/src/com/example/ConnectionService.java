@@ -44,15 +44,24 @@ public class ConnectionService extends Service {
     private TextMessage mLastMessage;
 
     static class TextMessage {
-        public long id;
+        public int id;
         public String data;
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof TextMessage) {
+                TextMessage msg = (TextMessage)obj;
+                return id == msg.id;
+            } else {
+                return false;
+            }
+        }
     }
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-        loadUnsentMessages();
         mSendMessageThread.start();
         Utils.debug("Create service");
     }
@@ -70,6 +79,7 @@ public class ConnectionService extends Service {
             String msgSelection = UnsentMessagestTableConstants._ID + "=?";
             String[] msgSelectionArgs = new String[]{unsetMsgIndex};
             Cursor msgCursor = getContentResolver().query(msgUri, msgProjection, msgSelection, msgSelectionArgs, null);
+
             if (msgCursor.getCount() > 0) {
                 msgCursor.moveToFirst();
                 String text = msgCursor.getString(msgCursor.getColumnIndexOrThrow(MessagesTableConstants._TEXT));
@@ -79,17 +89,29 @@ public class ConnectionService extends Service {
 
                 TextMessage message = new TextMessage();
                 message.data = text;
-                message.id = Long.parseLong(index);
-                mMessageQueue.add(message);
+                message.id = Integer.parseInt(index);
+
+                if (!mMessageQueue.contains(message)) {
+                    mMessageQueue.add(message);
+                }
             }
             msgCursor.close();
         }
 
-        mSendMessageSemaphore.release();
-        mSendMessageThread.interrupt();
-
         unsetMsgCursor.close();
     }
+
+    int getUnsentMessagesCount() {
+        Uri unsetMsgUri = UnsentMessagestTableConstants.CONTENT_URI;
+        String[] unsetMsgProjection = new String[]{UnsentMessagestTableConstants._ID};
+        Cursor cursor = getContentResolver().query(unsetMsgUri, unsetMsgProjection, null, null, null);
+        try {
+            return cursor.getCount();
+        } finally {
+            cursor.close();
+        }
+    }
+
 
     public void connect(String host) {
         Utils.debug("Start connect.");
@@ -177,14 +199,15 @@ public class ConnectionService extends Service {
                     case MSG_SEND_SOCKET:
                         Bundle data = msg.getData();
                         String msgData = data.getString(BUNDLE_MESSAGE_TEXT);
-                        long msgId = data.getLong(BUNDLE_MESSAGE_ID);
+                        int msgId = (int)data.getLong(BUNDLE_MESSAGE_ID);
+                        Utils.debug("Handle message:" + msgData + " Id:" + msgId);
 
                         TextMessage textMessage = new TextMessage();
                         textMessage.data = msgData;
                         textMessage.id = msgId;
-                        mMessageQueue.add(textMessage);
-
-                        Utils.debug("Handle message:" + msgData + " Id:" + msgId);
+                        if (!mMessageQueue.contains(textMessage)) {
+                            mMessageQueue.add(textMessage);
+                        }
                         mSendMessageThread.interrupt();
                         break;
                     default:
@@ -217,11 +240,17 @@ public class ConnectionService extends Service {
                             Utils.debug("Messages has send, wait to next part");
                         } else {
                             Utils.error("Can't connect to server.... retry after 60sec");
-                            Thread.sleep(20000);
+                            Thread.sleep(30000);
                             continue;
                         }
 
-                        Thread.sleep(30000);
+                        if (getUnsentMessagesCount() > 0) {
+                            loadUnsentMessages();
+                        } else if (mMessageQueue.size() > 0){
+                            continue;
+                        } else {
+                            Thread.sleep(120000);
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
